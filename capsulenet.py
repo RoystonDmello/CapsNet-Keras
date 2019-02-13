@@ -214,8 +214,8 @@ def load_mias():
 
     x_train = x_train.astype('float32') / 255.
     x_test = x_test.astype('float32') / 255.
-    y_train = to_categorical(y_train.astype('float32'))
-    y_test = to_categorical(y_test.astype('float32'))
+    y_train = to_categorical(y_train)
+    y_test = to_categorical(y_test)
     return (x_train, y_train), (x_test, y_test)
 
 if __name__ == "__main__":
