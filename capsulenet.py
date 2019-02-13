@@ -27,6 +27,8 @@ from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
 import pickle as pkl
 
+import cv2
+
 from sklearn.model_selection import train_test_split
 
 K.set_image_data_format('channels_last')
@@ -204,18 +206,20 @@ def load_mnist():
     return (x_train, y_train), (x_test, y_test)
 
 
-def load_mias():
+def load_mias(img_size):
     images = np.load('images.npy')
 
     with open('labels.pkl') as fp:
         labels = pkl.load(fp)
 
-    x_train, x_test, y_train, y_test = train_test_split(images, labels)
+    new_images = [cv2.reshape(images[i], (img_size, img_size)) for i in range(images.shape[0])]
+
+    x_train, x_test, y_train, y_test = train_test_split(np.array(new_images), labels)
 
     x_train = x_train.astype('float32') / 255.
     x_test = x_test.astype('float32') / 255.
     y_train = to_categorical(y_train)
-    y_test = to_categorical(y_test)
+    y_test = to_categorical(y_test.astype('float32'))
     return (x_train, y_train), (x_test, y_test)
 
 if __name__ == "__main__":
@@ -247,6 +251,8 @@ if __name__ == "__main__":
                         help="Digit to manipulate")
     parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
+    parser.add_argument('-i', '--img_size', default=299, type=int,
+                        help="Size of image to be used")
     args = parser.parse_args()
     print(args)
 
@@ -254,7 +260,7 @@ if __name__ == "__main__":
         os.makedirs(args.save_dir)
 
     # load data
-    (x_train, y_train), (x_test, y_test) = load_mias()
+    (x_train, y_train), (x_test, y_test) = load_mias(args.img_size)
 
     # define model
     model, eval_model, manipulate_model = CapsNet(input_shape=x_train.shape[1:],
@@ -274,4 +280,4 @@ if __name__ == "__main__":
         test(model=eval_model, data=(x_test, y_test), args=args)
 
 
-# python capsulenet.py --epochs 20 --batch_size 16 
+# python capsulenet.py --epochs 20 --batch_size 16 --img_size 128
