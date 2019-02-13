@@ -27,6 +27,8 @@ from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
 import pickle as pkl
 
+from sklearn.model_selection import train_test_split
+
 K.set_image_data_format('channels_last')
 
 
@@ -208,10 +210,13 @@ def load_mias():
     with open('labels.pkl') as fp:
         labels = pkl.load(fp)
 
-    images = images.astype('float32') / 255.
-    labels = to_categorical(labels)
+    x_train, x_test, y_train, y_test = train_test_split(images, labels)
 
-    return images, labels, None, None
+    x_train = x_train.reshape(-1, 28, 28, 1).astype('float32') / 255.
+    x_test = x_test.reshape(-1, 28, 28, 1).astype('float32') / 255.
+    y_train = to_categorical(y_train.astype('float32'))
+    y_test = to_categorical(y_test.astype('float32'))
+    return (x_train, y_train), (x_test, y_test)
 
 if __name__ == "__main__":
     import os
