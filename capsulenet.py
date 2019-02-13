@@ -25,6 +25,8 @@ from utils import combine_images
 from PIL import Image
 from capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask
 
+import pickle as pkl
+
 K.set_image_data_format('channels_last')
 
 
@@ -200,6 +202,17 @@ def load_mnist():
     return (x_train, y_train), (x_test, y_test)
 
 
+def load_mias():
+    images = np.load('images.npy')
+
+    with open('labels.pkl') as fp:
+        labels = pkl.load(fp)
+
+    images = images.astype('float32') / 255.
+    labels = to_categorical(labels)
+
+    return images, labels, None, None
+
 if __name__ == "__main__":
     import os
     import argparse
@@ -236,7 +249,7 @@ if __name__ == "__main__":
         os.makedirs(args.save_dir)
 
     # load data
-    (x_train, y_train), (x_test, y_test) = load_mnist()
+    (x_train, y_train), (x_test, y_test) = load_mias()
 
     # define model
     model, eval_model, manipulate_model = CapsNet(input_shape=x_train.shape[1:],
@@ -254,3 +267,6 @@ if __name__ == "__main__":
             print('No weights are provided. Will test using random initialized weights.')
         manipulate_latent(manipulate_model, (x_test, y_test), args)
         test(model=eval_model, data=(x_test, y_test), args=args)
+
+
+# python capsulenet.py --epochs 20 --batch_size 16 
