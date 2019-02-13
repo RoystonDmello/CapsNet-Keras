@@ -212,7 +212,7 @@ def load_mias(img_size):
     with open('labels.pkl') as fp:
         labels = pkl.load(fp)
 
-    new_images = [cv2.reshape(images[i], (img_size, img_size)) for i in range(images.shape[0])]
+    new_images = [cv2.resize(images[i], (img_size, img_size)) for i in range(images.shape[0])]
 
     x_train, x_test, y_train, y_test = train_test_split(np.array(new_images), labels)
 
